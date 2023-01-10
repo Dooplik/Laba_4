@@ -17,6 +17,15 @@ class Note:
         return " ".join([str(self.id), str(self.text), str(self.created_time), str(self.updated_time)])
 
 
+def get_ids():
+    file = open("notes.txt", "r").read().split("\n")
+    if len(file) < 1:
+        file = [line.split(" ") for line in file]
+        return [int(i[0]) for i in file]
+    else:
+        return [1]
+
+
 def update_note_text(string, text):
     args = string.split(" ")
     print(len(args))
@@ -26,7 +35,7 @@ def update_note_text(string, text):
 
 
 def token_validation(line):
-    file = open("tokens", "r").read().split("\n")
+    file = open("tokens.txt", "r").read().split("\n")
     if str(line) in file:
         return True
     else:
@@ -36,7 +45,7 @@ def token_validation(line):
 @api_router.post("/create", response_model=model.Create)
 def create_note(text: str, token: str):
     global id_list
-    file = open("notes", "r").read().split("\n")
+    file = open("notes.txt", "r").read().split("\n")
     if len(id_list) <= 1:
         id_list.append(0)
     else:
@@ -44,7 +53,7 @@ def create_note(text: str, token: str):
     if token_validation(token):
         id_list.append(id_list[-1] + 1)
         note = Note(id_list[-1], text, datetime.datetime.now(), datetime.datetime.now())
-        file = open("notes", "a")
+        file = open("notes.txt", "a")
         file.write(f"\n{note.to_string()}")
         return model.Create(
             id=note.id
@@ -59,13 +68,13 @@ def create_note(text: str, token: str):
 @api_router.delete("/delete", response_model=model.Delete)
 def delete_note(ID: int, token: str):
     if token_validation(token):
-        file = open("notes", "r")
+        file = open("notes.txt", "r")
         note_list = file.read().split("\n")
         for i in range(len(note_list)):
             if note_list[i][0] == str(ID):
                 note_list.pop(i)
                 break
-        file = open("notes", "w")
+        file = open("notes.txt", "w")
         file.write("\n".join(note_list))
         return model.Delete(
             removed_id=ID
@@ -80,7 +89,7 @@ def delete_note(ID: int, token: str):
 @api_router.get("/getList", response_model=model.GetList)
 def get_notes_list(token: str):
     if token_validation(token):
-        file = open("notes", "r")
+        file = open("notes.txt", "r")
         note_list = file.read().split("\n")
         list_of_id = [note[0] for note in note_list]
         return model.GetList(
@@ -96,7 +105,7 @@ def get_notes_list(token: str):
 @api_router.get("/getInfo", response_model=model.GetInfo)
 def get_note_info(ID: int, token: str):
     if token_validation(token):
-        file = open("notes", "r")
+        file = open("notes.txt", "r")
         note_list = file.read().split("\n")
         for i in range(len(note_list)):
             if note_list[i][0] == str(ID):
@@ -118,12 +127,12 @@ def get_note_info(ID: int, token: str):
 @api_router.patch("/update", response_model=model.Update)
 def update_note(ID: int, text: str, token: str):
     if token_validation(token):
-        file = open("notes", "r")
+        file = open("notes.txt", "r")
         note_list = file.read().split("\n")
         for i in range(len(note_list)):
             if note_list[i][0] == str(ID):
                 note_list[i] = update_note_text(note_list[i], text).to_string()
-        file = open("notes", "w")
+        file = open("notes.txt", "w")
         file.write("\n".join(note_list))
         return model.Update(
             id=ID,
@@ -139,7 +148,7 @@ def update_note(ID: int, text: str, token: str):
 @api_router.get("/getText", response_model=model.GetText)
 def get_note_for_id(ID: int, token: str):
     if token_validation(token):
-        file = open("notes", "r")
+        file = open("notes.txt", "r")
         note_list = file.read().split("\n")
         for i in range(len(note_list)):
             if note_list[i][0] == str(ID):
