@@ -19,7 +19,7 @@ class Note:
 
 def get_ids():
     file = open("notes.txt", "r").read().split("\n")
-    if len(file) < 1:
+    if len(file) > 1:
         file = [line.split(" ") for line in file]
         return [int(i[0]) for i in file]
     else:
